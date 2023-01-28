@@ -1,10 +1,13 @@
-FROM eclipse-temurin:17-jdk-alpine
-WORKDIR /learning-spring
+FROM alpine/git
+WORKDIR /app
+RUN git clone https://github.com/raviyadv/learning-spring.git
 
-#COPY .mvn/ .mvn
-COPY  pom.xml ./
-RUN ./mvn dependency:resolve
+FROM maven:3.5-jdk-8-alpine
+WORKDIR /app
+COPY --from=0 /app/spring-petclinic /app
+RUN mvn install
 
-COPY src ./src
-
-CMD ["./mvn", "spring-boot:run"]
+FROM openjdk:8-jre-alpine
+WORKDIR /app
+COPY --from=1 /app/target/learning-spring-0.0.1-SNAPSHOT.jar /app
+CMD ["java -jar learning-spring-0.0.1-SNAPSHOT.jar"]
